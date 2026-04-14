@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from python_slugify import slugify
+from slugify import slugify
 
 from app.database import get_db
 from app.dependencies import require_superadmin

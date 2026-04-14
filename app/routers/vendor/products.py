@@ -59,7 +59,7 @@ async def add_product(
 
     # Create product if not existing
     if not product_id and product_name:
-        from python_slugify import slugify
+        from slugify import slugify
         import uuid
         prod = Product(
             brand_id=brand_id,

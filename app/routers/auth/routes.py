@@ -227,7 +227,7 @@ def vendor_register(
             "error": "Email already registered."
         })
 
-    from python_slugify import slugify
+    from slugify import slugify
     user = User(
         email=email, name=name.strip(), phone=phone.strip(),
         hashed_password=auth_svc.hash_password(password),
