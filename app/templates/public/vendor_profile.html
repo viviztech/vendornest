@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ vendor.business_name }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">{{ vendor.business_name }}</h1>
+    {% if vendor.gst_number %}<p class="text-sm text-gray-400 mt-1">GST: {{ vendor.gst_number }}</p>{% endif %}
+    <p class="text-sm text-gray-500 mt-2">{{ vendor.address_line }}</p>
+  </div>
+  <h2 class="text-lg font-semibold text-gray-900 mb-4">Products ({{ products|length }})</h2>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {% for listing in products %}
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <div class="h-28 flex items-center justify-center mb-3">
+        {% if listing.product.primary_image %}
+        <img src="{{ listing.product.primary_image.image_url }}" class="max-h-28 object-contain">
+        {% else %}
+        <div class="text-3xl text-gray-200">🖥️</div>
+        {% endif %}
+      </div>
+      <p class="text-xs text-gray-400">{{ listing.product.brand.name if listing.product.brand else '' }}</p>
+      <p class="text-sm font-medium text-gray-900 line-clamp-2">{{ listing.product.name }}</p>
+      <p class="text-blue-600 font-bold mt-1">₹{{ "%.2f"|format(listing.price) }}</p>
+      <form method="post" action="/customer/cart/add" class="mt-2">
+        <input type="hidden" name="listing_id" value="{{ listing.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button class="w-full bg-blue-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-blue-700">Add to Cart</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="col-span-4 py-12 text-center text-gray-400">No products listed yet.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "customer/base_customer.html" %}
+{% block title %}Service Request #{{ req.id }}{% endblock %}
+{% block page_title %}Service Request #{{ req.id }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-gray-900">{{ req.service_type|replace('_',' ')|capitalize }}</h2>
+      <span class="px-2 py-1 rounded-full text-xs font-medium
+        {% if req.status == 'completed' %}bg-green-100 text-green-700
+        {% elif req.status == 'cancelled' %}bg-red-100 text-red-700
+        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+        {{ req.status|capitalize }}
+      </span>
+    </div>
+    <div class="space-y-3 text-sm">
+      <div>
+        <p class="text-gray-500 text-xs">Issue Description</p>
+        <p class="text-gray-900 mt-1">{{ req.issue_description }}</p>
+      </div>
+      {% if req.preferred_date %}
+      <div>
+        <p class="text-gray-500 text-xs">Preferred Date</p>
+        <p class="text-gray-900 mt-1">{{ req.preferred_date.strftime('%d %b %Y') }}</p>
+      </div>
+      {% endif %}
+      {% if req.vendor %}
+      <div>
+        <p class="text-gray-500 text-xs">Assigned Vendor</p>
+        <p class="text-gray-900 mt-1">{{ req.vendor.business_name }}</p>
+      </div>
+      {% endif %}
+      <div>
+        <p class="text-gray-500 text-xs">Requested On</p>
+        <p class="text-gray-900 mt-1">{{ req.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+      </div>
+    </div>
+    <div class="mt-6">
+      <a href="/customer/services" class="text-sm text-blue-600 hover:underline">← Back to services</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

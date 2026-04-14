@@ -1,0 +1,27 @@
+{% extends "customer/base_customer.html" %}
+{% block title %}New B2B Quote Request{% endblock %}
+{% block page_title %}New B2B Quote Request{% endblock %}
+{% block content %}
+<div class="max-w-lg">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <form method="post" action="/customer/b2b/request" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Request Title *</label>
+        <input type="text" name="title" required
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               placeholder="e.g., 20 Laptops for office">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+        <textarea name="description" rows="5" required
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="List products, quantities, specifications, timeline, budget..."></textarea>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">Submit Request</button>
+        <a href="/customer/b2b" class="px-6 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

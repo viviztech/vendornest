@@ -1,0 +1,42 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Pincode Coverage{% endblock %}
+{% block page_title %}Pincode Coverage{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Add Pincode -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <h2 class="font-semibold text-gray-900 mb-4">Add Pincode</h2>
+    <form method="post" action="/vendor/pincodes/add" class="flex gap-3">
+      <input type="text" name="pincode_str" maxlength="6" pattern="[0-9]{6}"
+             class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+             placeholder="Enter 6-digit pincode" required>
+      <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">Add</button>
+    </form>
+    <p class="text-xs text-gray-400 mt-2">Only pincodes available in our database can be added.</p>
+  </div>
+
+  <!-- Covered Pincodes -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="font-semibold text-gray-900">Covered Pincodes ({{ covered_pincodes|length }})</h2>
+    </div>
+    {% if covered_pincodes %}
+    <div class="max-h-96 overflow-y-auto divide-y divide-gray-100">
+      {% for vp in covered_pincodes %}
+      <div class="px-6 py-3 flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-900">{{ vp.pincode.pincode }}</p>
+          <p class="text-xs text-gray-400">{{ vp.pincode.office_name }}, {{ vp.pincode.district.name if vp.pincode.district else '' }}</p>
+        </div>
+        <form method="post" action="/vendor/pincodes/{{ vp.id }}/remove">
+          <button class="text-xs text-red-500 hover:text-red-700">Remove</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="px-6 py-12 text-center text-gray-400">No pincodes added yet. Customers won't find you in search.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

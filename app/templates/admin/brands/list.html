@@ -1,0 +1,54 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Brands{% endblock %}
+{% block page_title %}Brands{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <p class="text-sm text-gray-500">{{ brands|length }} brand(s)</p>
+  <a href="/admin/brands/add" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Add Brand</a>
+</div>
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Brand</th>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Description</th>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Sort</th>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Status</th>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for brand in brands %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-3">
+            {% if brand.logo_url %}
+            <img src="{{ brand.logo_url }}" class="w-8 h-8 object-contain rounded" alt="{{ brand.name }}">
+            {% else %}
+            <div class="w-8 h-8 bg-gray-200 rounded flex items-center justify-center text-xs font-bold text-gray-500">{{ brand.name[:2].upper() }}</div>
+            {% endif %}
+            <span class="font-medium text-gray-900">{{ brand.name }}</span>
+          </div>
+        </td>
+        <td class="px-6 py-4 text-gray-500">{{ brand.description or '—' }}</td>
+        <td class="px-6 py-4 text-gray-500">{{ brand.sort_order }}</td>
+        <td class="px-6 py-4">
+          <span class="px-2 py-1 rounded-full text-xs font-medium {% if brand.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+            {{ 'Active' if brand.is_active else 'Inactive' }}
+          </span>
+        </td>
+        <td class="px-6 py-4">
+          <form method="post" action="/admin/brands/{{ brand.id }}/toggle" class="inline">
+            <button class="text-xs px-3 py-1 rounded border {% if brand.is_active %}border-red-300 text-red-600 hover:bg-red-50{% else %}border-green-300 text-green-600 hover:bg-green-50{% endif %}">
+              {{ 'Deactivate' if brand.is_active else 'Activate' }}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="px-6 py-12 text-center text-gray-400">No brands yet. <a href="/admin/brands/add" class="text-blue-600 hover:underline">Add one</a>.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

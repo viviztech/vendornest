@@ -1,0 +1,47 @@
+{% extends "customer/base_customer.html" %}
+{% block title %}Quote Request #{{ quote.id }}{% endblock %}
+{% block page_title %}Quote Request #{{ quote.id }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl space-y-4">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-semibold text-gray-900">{{ quote.title }}</h2>
+      <span class="px-2 py-1 rounded-full text-xs font-medium
+        {% if quote.status == 'accepted' %}bg-green-100 text-green-700
+        {% elif quote.status == 'rejected' %}bg-red-100 text-red-700
+        {% elif quote.status == 'quoted' %}bg-blue-100 text-blue-700
+        {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+        {{ quote.status|capitalize }}
+      </span>
+    </div>
+    <p class="text-sm text-gray-700">{{ quote.description }}</p>
+    <p class="text-xs text-gray-400 mt-3">Submitted {{ quote.created_at.strftime('%d %b %Y') }}</p>
+  </div>
+
+  <!-- Messages -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="font-semibold text-gray-900">Messages</h3>
+    </div>
+    <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto">
+      {% for msg in quote.messages %}
+      <div class="px-6 py-3 {% if msg.sender_role == 'customer' %}bg-blue-50{% endif %}">
+        <p class="text-xs text-gray-400 mb-1">{{ msg.sender_role|capitalize }} · {{ msg.created_at.strftime('%d %b %H:%M') }}</p>
+        <p class="text-sm text-gray-800">{{ msg.message }}</p>
+      </div>
+      {% else %}
+      <div class="px-6 py-8 text-center text-gray-400 text-sm">No messages yet.</div>
+      {% endfor %}
+    </div>
+    <div class="px-6 py-4 border-t border-gray-100">
+      <form method="post" action="/customer/b2b/{{ quote.id }}/message" class="flex gap-3">
+        <input type="text" name="message" required
+               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+               placeholder="Type a message...">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">Send</button>
+      </form>
+    </div>
+  </div>
+  <a href="/customer/b2b" class="text-sm text-blue-600 hover:underline">← Back to quotes</a>
+</div>
+{% endblock %}

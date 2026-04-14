@@ -1,0 +1,61 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}My Products{% endblock %}
+{% block page_title %}My Products{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <p class="text-sm text-gray-500">{{ total }} product listing(s)</p>
+  <a href="/vendor/products/add" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ Add Product</a>
+</div>
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Product</th>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Brand</th>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Price</th>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Stock</th>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Status</th>
+        <th class="px-6 py-3 text-left font-medium text-gray-600">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for listing in products %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 font-medium text-gray-900">{{ listing.product.name }}</td>
+        <td class="px-6 py-4 text-gray-500">{{ listing.product.brand.name if listing.product.brand else '—' }}</td>
+        <td class="px-6 py-4 font-medium">₹{{ "%.2f"|format(listing.price) }}</td>
+        <td class="px-6 py-4">
+          <form method="post" action="/vendor/products/{{ listing.id }}/update-stock" class="flex items-center gap-2">
+            <input type="number" name="stock" value="{{ listing.stock }}" min="0"
+                   class="w-20 border border-gray-300 rounded px-2 py-1 text-sm">
+            <button type="submit" class="text-xs text-blue-600 hover:underline">Save</button>
+          </form>
+        </td>
+        <td class="px-6 py-4">
+          <span class="px-2 py-1 rounded-full text-xs font-medium {% if listing.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+            {{ 'Active' if listing.is_active else 'Inactive' }}
+          </span>
+        </td>
+        <td class="px-6 py-4">
+          <form method="post" action="/vendor/products/{{ listing.id }}/toggle">
+            <button class="text-xs px-3 py-1 rounded border {% if listing.is_active %}border-red-300 text-red-600 hover:bg-red-50{% else %}border-green-300 text-green-600 hover:bg-green-50{% endif %}">
+              {{ 'Deactivate' if listing.is_active else 'Activate' }}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="px-6 py-12 text-center text-gray-400">No products yet. <a href="/vendor/products/add" class="text-blue-600 hover:underline">Add your first product</a>.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<!-- Pagination -->
+{% if pages > 1 %}
+<div class="flex justify-center gap-2 mt-6">
+  {% for p in range(1, pages+1) %}
+  <a href="?page={{ p }}" class="px-3 py-1 rounded text-sm {% if p == page %}bg-blue-600 text-white{% else %}border border-gray-300 text-gray-600 hover:bg-gray-50{% endif %}">{{ p }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

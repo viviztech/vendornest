@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-gray-900 mb-6">Hardware Products</h1>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {% for product in products %}
+    <a href="/products/{{ product.slug }}" class="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-shadow p-4 group">
+      <div class="h-36 flex items-center justify-center mb-3">
+        {% if product.primary_image %}
+        <img src="{{ product.primary_image.image_url }}" class="max-h-36 object-contain" alt="{{ product.name }}">
+        {% else %}
+        <div class="text-4xl text-gray-200">🖥️</div>
+        {% endif %}
+      </div>
+      <p class="text-xs text-gray-400 mb-1">{{ product.brand.name if product.brand else '' }}</p>
+      <p class="text-sm font-medium text-gray-900 group-hover:text-blue-600 line-clamp-2">{{ product.name }}</p>
+    </a>
+    {% else %}
+    <div class="col-span-4 py-16 text-center text-gray-400">No products found.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

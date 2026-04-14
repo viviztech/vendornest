@@ -1,0 +1,38 @@
+{% extends "customer/base_customer.html" %}
+{% block title %}Book Service{% endblock %}
+{% block page_title %}Book a Service Visit{% endblock %}
+{% block content %}
+<div class="max-w-lg">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <form method="post" action="/customer/services/book" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Service Type *</label>
+        <select name="service_type" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Select service type</option>
+          <option value="repair">Repair</option>
+          <option value="installation">Installation</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="data_recovery">Data Recovery</option>
+          <option value="networking">Networking Setup</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Issue Description *</label>
+        <textarea name="issue_description" rows="4" required
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Describe the issue in detail..."></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
+        <input type="date" name="preferred_date"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">Book Service</button>
+        <a href="/customer/services" class="px-6 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

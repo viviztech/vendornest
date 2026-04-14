@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Image -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 flex items-center justify-center min-h-64">
+      {% if product.primary_image %}
+      <img src="{{ product.primary_image.image_url }}" class="max-h-64 object-contain" alt="{{ product.name }}">
+      {% else %}
+      <div class="text-gray-300 text-6xl">🖥️</div>
+      {% endif %}
+    </div>
+    <!-- Details -->
+    <div>
+      <p class="text-sm text-gray-400 mb-1">{{ product.brand.name if product.brand else '' }} · {{ product.category.name if product.category else '' }}</p>
+      <h1 class="text-2xl font-bold text-gray-900 mb-3">{{ product.name }}</h1>
+      {% if product.description %}
+      <p class="text-gray-600 text-sm mb-4">{{ product.description }}</p>
+      {% endif %}
+      <div class="mt-4">
+        <p class="text-sm font-medium text-gray-700 mb-2">Available from {{ listings|length }} vendor(s) near you:</p>
+        <div class="space-y-3">
+          {% for listing in listings %}
+          <div class="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+            <div>
+              <p class="font-medium text-gray-900">{{ listing.vendor.business_name }}</p>
+              <p class="text-xs text-gray-400">Stock: {{ listing.stock }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-lg font-bold text-blue-600">₹{{ "%.2f"|format(listing.price) }}</p>
+              <form method="post" action="/customer/cart/add">
+                <input type="hidden" name="listing_id" value="{{ listing.id }}">
+                <input type="hidden" name="quantity" value="1">
+                <button class="mt-1 bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-700">Add to Cart</button>
+              </form>
+            </div>
+          </div>
+          {% else %}
+          <p class="text-gray-400 text-sm">No vendors available in your area for this product.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

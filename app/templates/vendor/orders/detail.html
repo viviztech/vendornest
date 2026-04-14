@@ -1,0 +1,96 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Order #{{ order.id }}{% endblock %}
+{% block page_title %}Order #{{ order.id }}{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Order Items -->
+  <div class="lg:col-span-2 space-y-4">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <h2 class="font-semibold text-gray-900">Order Items</h2>
+        <span class="px-2 py-1 rounded-full text-xs font-medium
+          {% if order.status == 'delivered' %}bg-green-100 text-green-700
+          {% elif order.status == 'cancelled' %}bg-red-100 text-red-700
+          {% elif order.status == 'shipped' %}bg-blue-100 text-blue-700
+          {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+          {{ order.status|capitalize }}
+        </span>
+      </div>
+      <div class="divide-y divide-gray-100">
+        {% for item in order.items %}
+        <div class="px-6 py-4 flex justify-between items-center">
+          <div>
+            <p class="font-medium text-gray-900">{{ item.product_name }}</p>
+            <p class="text-xs text-gray-500">Qty: {{ item.quantity }} × ₹{{ "%.2f"|format(item.unit_price) }}</p>
+          </div>
+          <p class="font-medium">₹{{ "%.2f"|format(item.total_price) }}</p>
+        </div>
+        {% endfor %}
+        <div class="px-6 py-4 flex justify-between font-semibold text-gray-900">
+          <span>Total</span>
+          <span>₹{{ "%.2f"|format(order.total_amount) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Status -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="font-semibold text-gray-900 mb-4">Update Status</h2>
+      <form method="post" action="/vendor/orders/{{ order.id }}/update-status" class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">New Status</label>
+            <select name="new_status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+              {% for s in ['confirmed', 'processing', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'] %}
+              <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s|replace('_',' ')|capitalize }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">AWB / Waybill</label>
+            <input type="text" name="waybill" value="{{ order.delhivery_awb or '' }}"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Tracking number">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
+          <input type="text" name="note" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Optional note">
+        </div>
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">Update Status</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="space-y-4">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+      <h3 class="font-semibold text-gray-900 mb-3">Customer</h3>
+      <p class="text-sm text-gray-700 font-medium">{{ order.customer.name if order.customer else '—' }}</p>
+      <p class="text-sm text-gray-500">{{ order.customer.phone if order.customer else '' }}</p>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+      <h3 class="font-semibold text-gray-900 mb-3">Delivery Address</h3>
+      {% if order.address %}
+      <p class="text-sm text-gray-700">{{ order.address.address_line }}</p>
+      <p class="text-sm text-gray-500">{{ order.address.city }}, {{ order.address.pincode }}</p>
+      {% else %}
+      <p class="text-sm text-gray-400">No address</p>
+      {% endif %}
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+      <h3 class="font-semibold text-gray-900 mb-3">Tracking History</h3>
+      <div class="space-y-2">
+        {% for t in order.tracking|sort(attribute='created_at', reverse=True) %}
+        <div class="text-xs">
+          <p class="font-medium text-gray-700">{{ t.status|replace('_',' ')|capitalize }}</p>
+          <p class="text-gray-400">{{ t.description }}</p>
+          <p class="text-gray-300">{{ t.created_at.strftime('%d %b %H:%M') }}</p>
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-400">No tracking updates yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
