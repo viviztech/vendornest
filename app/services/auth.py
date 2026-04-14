@@ -8,21 +8,23 @@ import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import bcrypt as _bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.models.user import User, OTPLog, UserRole
 
-pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ── Password ───────────────────────────────────────────────────────────────────
 def hash_password(password: str) -> str:
-    return pwd_ctx.hash(password)
+    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt()).decode()
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_ctx.verify(plain, hashed)
+    try:
+        return _bcrypt.checkpw(plain.encode(), hashed.encode())
+    except Exception:
+        return False
 
 # ── OTP ────────────────────────────────────────────────────────────────────────
 def generate_otp(length: int = 6) -> str:

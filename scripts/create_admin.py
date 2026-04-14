@@ -4,12 +4,14 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import bcrypt
 from app.database import SessionLocal
 from app.models.user import User, UserRole
 from app.config import settings
-from passlib.context import CryptContext
 
-pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 def main():
     db = SessionLocal()
@@ -21,7 +23,7 @@ def main():
         admin = User(
             email=settings.superadmin_email,
             name=settings.superadmin_name,
-            hashed_password=pwd_ctx.hash(settings.superadmin_password),
+            hashed_password=hash_password(settings.superadmin_password),
             role=UserRole.superadmin,
             is_active=True,
             is_email_verified=True,
