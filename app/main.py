@@ -20,6 +20,7 @@ from app.routers.vendor.products import router as vendor_products_router
 from app.routers.vendor.orders import router as vendor_orders_router
 from app.routers.vendor.service import router as vendor_service_router
 from app.routers.vendor.pincodes import router as vendor_pincodes_router
+from app.routers.customer.profile import router as customer_profile_router
 from app.routers.customer.orders import router as customer_orders_router
 from app.routers.customer.service import router as customer_service_router
 from app.routers.customer.b2b import router as customer_b2b_router
@@ -56,6 +57,7 @@ app.include_router(vendor_products_router)
 app.include_router(vendor_orders_router)
 app.include_router(vendor_service_router)
 app.include_router(vendor_pincodes_router)
+app.include_router(customer_profile_router)
 app.include_router(customer_orders_router)
 app.include_router(customer_service_router)
 app.include_router(customer_b2b_router)

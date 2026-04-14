@@ -1,7 +1,7 @@
 {% extends "customer/base_customer.html" %}
 {% block title %}B2B Quotes{% endblock %}
-{% block page_title %}B2B Quote Requests{% endblock %}
-{% block content %}
+
+{% block customer_content %}
 <div class="flex justify-between items-center mb-6">
   <p class="text-sm text-gray-500">{{ quotes|length }} quote request(s)</p>
   <a href="/customer/b2b/request" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">+ New Request</a>
