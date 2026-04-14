@@ -27,9 +27,13 @@ class Settings(BaseSettings):
     aws_s3_bucket: str = "vendornest-media"
     aws_cloudfront_url: str = ""
 
-    # Email (AWS SES)
-    ses_from_email: str = "noreply@vendornest.in"
-    ses_from_name: str = "VendorNest"
+    # Email (SMTP - Gmail free tier)
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""   # Gmail App Password
+    smtp_from_email: str = ""
+    smtp_from_name: str = "VendorNest"
     ses_reply_to: str = "support@vendornest.in"
 
     # Razorpay

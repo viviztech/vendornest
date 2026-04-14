@@ -1,10 +1,10 @@
 """
-Notification service: Email via AWS SES.
+Notification service: Email via SMTP (Gmail free tier).
 SMS and WhatsApp stubbed for future activation.
 """
-import boto3
-from botocore.exceptions import BotoCoreError, ClientError
-from jinja2 import Template
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from typing import Optional
 import logging
 
@@ -13,39 +13,37 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
-def _ses_client():
-    return boto3.client(
-        "ses",
-        region_name=settings.aws_region,
-        aws_access_key_id=settings.aws_access_key_id,
-        aws_secret_access_key=settings.aws_secret_access_key,
-    )
-
-
 def send_email(
     to: str,
     subject: str,
     html_body: str,
     text_body: Optional[str] = None,
 ) -> bool:
+    if not settings.smtp_username or not settings.smtp_password:
+        logger.warning(f"[EMAIL STUB] To: {to} | Subject: {subject} — SMTP not configured")
+        return True  # Fail silently in dev so registration still works
+
     try:
-        client = _ses_client()
-        client.send_email(
-            Source=f"{settings.ses_from_name} <{settings.ses_from_email}>",
-            Destination={"ToAddresses": [to]},
-            ReplyToAddresses=[settings.ses_reply_to],
-            Message={
-                "Subject": {"Data": subject, "Charset": "UTF-8"},
-                "Body": {
-                    "Html": {"Data": html_body, "Charset": "UTF-8"},
-                    **({"Text": {"Data": text_body, "Charset": "UTF-8"}} if text_body else {}),
-                },
-            },
-        )
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email or settings.smtp_username}>"
+        msg["To"] = to
+        msg["Reply-To"] = settings.ses_reply_to
+
+        if text_body:
+            msg.attach(MIMEText(text_body, "plain", "utf-8"))
+        msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=10) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(settings.smtp_username, settings.smtp_password)
+            server.sendmail(msg["From"], [to], msg.as_string())
+
         logger.info(f"Email sent to {to}: {subject}")
         return True
-    except (BotoCoreError, ClientError) as e:
-        logger.error(f"SES error sending to {to}: {e}")
+    except Exception as e:
+        logger.error(f"SMTP error sending to {to}: {e}")
         return False
 
 
@@ -61,7 +59,8 @@ def send_otp_email(to: str, otp: str, name: str = "") -> bool:
       <p style="color:#6b7280;font-size:12px;">If you did not request this, please ignore this email.</p>
     </div>
     """
-    return send_email(to, subject, html)
+    text = f"Hello {name or 'there'},\n\nYour VendorNest OTP is: {otp}\n\nValid for {settings.otp_expire_minutes} minutes."
+    return send_email(to, subject, html, text)
 
 
 def send_order_confirmation_email(to: str, name: str, order_number: str, total: float) -> bool:
@@ -71,7 +70,7 @@ def send_order_confirmation_email(to: str, name: str, order_number: str, total: 
       <h2 style="color:#1d4ed8;">Order Confirmed!</h2>
       <p>Hello {name},</p>
       <p>Your order <strong>#{order_number}</strong> has been confirmed.</p>
-      <p>Total Amount: <strong>₹{total:,.2f}</strong></p>
+      <p>Total Amount: <strong>&#8377;{total:,.2f}</strong></p>
       <p>You will receive updates as your order is processed and shipped.</p>
       <a href="{settings.app_base_url}/customer/orders/{order_number}"
          style="display:inline-block;padding:12px 24px;background:#1d4ed8;color:white;border-radius:6px;text-decoration:none;">
@@ -131,12 +130,11 @@ def send_service_booking_email(to: str, name: str, request_number: str, date: st
 # ── Stubs for future SMS / WhatsApp ───────────────────────────────────────────
 def send_sms(phone: str, message: str) -> bool:
     logger.info(f"[SMS STUB] To {phone}: {message}")
-    return True  # Replace with MSG91 when activated
+    return True
 
 
 def send_whatsapp(phone: str, template: str, params: dict) -> bool:
     if not settings.whatsapp_enabled:
         logger.info(f"[WhatsApp STUB] To {phone}: {template}")
         return True
-    # Meta Cloud API call here when enabled
     return True
