@@ -1,6 +1,7 @@
 """FastAPI dependencies: auth guards, DB session, pagination."""
 from typing import Optional
-from fastapi import Depends, HTTPException, Request, status, Cookie
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -41,25 +42,61 @@ def get_current_user_optional(
         return None
 
 
-def require_superadmin(user: User = Depends(get_current_user)) -> User:
+def require_superadmin(request: Request, db: Session = Depends(get_db)):
+    token = get_token_from_cookie(request)
+    if not token:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    payload = decode_token(token)
+    if not payload or payload.get("type") != "access":
+        return RedirectResponse(url="/auth/login", status_code=302)
+    user = get_user_by_id(db, int(payload["sub"]))
+    if not user or not user.is_active:
+        return RedirectResponse(url="/auth/login", status_code=302)
     if user.role != UserRole.superadmin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     return user
 
 
-def require_vendor(user: User = Depends(get_current_user)) -> User:
+def require_vendor(request: Request, db: Session = Depends(get_db)):
+    token = get_token_from_cookie(request)
+    if not token:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    payload = decode_token(token)
+    if not payload or payload.get("type") != "access":
+        return RedirectResponse(url="/auth/login", status_code=302)
+    user = get_user_by_id(db, int(payload["sub"]))
+    if not user or not user.is_active:
+        return RedirectResponse(url="/auth/login", status_code=302)
     if user.role != UserRole.vendor:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Vendor access required")
     return user
 
 
-def require_customer(user: User = Depends(get_current_user)) -> User:
+def require_customer(request: Request, db: Session = Depends(get_db)):
+    token = get_token_from_cookie(request)
+    if not token:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    payload = decode_token(token)
+    if not payload or payload.get("type") != "access":
+        return RedirectResponse(url="/auth/login", status_code=302)
+    user = get_user_by_id(db, int(payload["sub"]))
+    if not user or not user.is_active:
+        return RedirectResponse(url="/auth/login", status_code=302)
     if user.role != UserRole.customer:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Customer access required")
     return user
 
 
-def require_admin_or_vendor(user: User = Depends(get_current_user)) -> User:
+def require_admin_or_vendor(request: Request, db: Session = Depends(get_db)):
+    token = get_token_from_cookie(request)
+    if not token:
+        return RedirectResponse(url="/auth/login", status_code=302)
+    payload = decode_token(token)
+    if not payload or payload.get("type") != "access":
+        return RedirectResponse(url="/auth/login", status_code=302)
+    user = get_user_by_id(db, int(payload["sub"]))
+    if not user or not user.is_active:
+        return RedirectResponse(url="/auth/login", status_code=302)
     if user.role not in (UserRole.superadmin, UserRole.vendor):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
     return user
