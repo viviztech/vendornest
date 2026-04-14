@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Verify Email{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto py-10">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+    <div class="text-5xl mb-4">📧</div>
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">Check Your Email</h1>
+    <p class="text-gray-500 text-sm mb-6">We sent a 6-digit OTP to <strong>{{ email }}</strong></p>
+
+    {% if error %}<div class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 text-sm mb-4">{{ error }}</div>{% endif %}
+
+    <form method="post" action="/auth/verify-email" class="space-y-4 text-left">
+      <input type="hidden" name="email" value="{{ email }}"/>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Enter OTP</label>
+        <input type="text" name="otp" required maxlength="6" pattern="[0-9]{6}" placeholder="000000"
+               class="w-full border border-gray-300 rounded-lg px-4 py-3 text-center text-2xl tracking-widest font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      </div>
+      <button type="submit"
+              class="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+        Verify OTP
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

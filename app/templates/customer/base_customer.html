@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block main_class %}max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8{% endblock %}
+{% block content %}
+<div class="flex gap-8">
+  <!-- Sidebar -->
+  <aside class="w-56 flex-shrink-0">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+      <div class="text-sm font-semibold text-gray-500 mb-3">My Account</div>
+      {% set nav = [
+        ('/customer/orders', 'My Orders', '📦'),
+        ('/customer/services', 'Service Requests', '🔧'),
+        ('/customer/b2b', 'B2B Quotes', '🏢'),
+        ('/customer/cart', 'Cart', '🛒'),
+      ] %}
+      {% for href, label, icon in nav %}
+      <a href="{{ href }}" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors
+         {% if request.url.path.startswith(href) %}bg-blue-50 text-blue-700 font-medium{% else %}text-gray-600 hover:bg-gray-50{% endif %}">
+        <span>{{ icon }}</span>{{ label }}
+      </a>
+      {% endfor %}
+    </div>
+  </aside>
+  <div class="flex-1">
+    {% block customer_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

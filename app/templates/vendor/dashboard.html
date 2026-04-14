@@ -1,0 +1,60 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+    <div class="text-gray-500 text-sm mb-1">Total Orders</div>
+    <div class="text-3xl font-bold text-gray-900">{{ stats.total_orders }}</div>
+  </div>
+  <div class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+    <div class="text-gray-500 text-sm mb-1">New Orders</div>
+    <div class="text-3xl font-bold text-yellow-600">{{ stats.pending_orders }}</div>
+  </div>
+  <div class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+    <div class="text-gray-500 text-sm mb-1">Service Requests</div>
+    <div class="text-3xl font-bold text-blue-600">{{ stats.total_services }}</div>
+  </div>
+  <div class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+    <div class="text-gray-500 text-sm mb-1">Pending Services</div>
+    <div class="text-3xl font-bold text-orange-600">{{ stats.pending_services }}</div>
+  </div>
+  <div class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+    <div class="text-gray-500 text-sm mb-1">Products Listed</div>
+    <div class="text-3xl font-bold text-green-600">{{ stats.total_products }}</div>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+  <div class="p-5 border-b border-gray-100 flex justify-between">
+    <h3 class="font-semibold text-gray-900">Recent Orders</h3>
+    <a href="/vendor/orders" class="text-sm text-blue-600 hover:underline">View all</a>
+  </div>
+  <table class="w-full">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Order</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-50">
+      {% for order in recent_orders %}
+      <tr>
+        <td class="px-6 py-3 font-medium text-sm">#{{ order.order_number }}</td>
+        <td class="px-6 py-3 text-sm">₹{{ "%.0f"|format(order.total_amount) }}</td>
+        <td class="px-6 py-3">
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+            {{ order.status.value.replace('_', ' ')|title }}
+          </span>
+        </td>
+        <td class="px-6 py-3 text-sm text-gray-400">{{ order.created_at.strftime('%d %b') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

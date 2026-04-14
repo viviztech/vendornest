@@ -1,0 +1,73 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+  {% set stat_cards = [
+    ('Total Vendors', stats.total_vendors, '🏪', 'blue'),
+    ('Pending Approval', stats.pending_vendors, '⏳', 'yellow'),
+    ('Total Customers', stats.total_customers, '👥', 'green'),
+    ('Total Orders', stats.total_orders, '📦', 'blue'),
+    ('Active Orders', stats.confirmed_orders, '✅', 'green'),
+    ('Pending Services', stats.pending_services, '🔧', 'orange'),
+  ] %}
+  {% for label, value, icon, color in stat_cards %}
+  <div class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-gray-500 text-sm">{{ label }}</span>
+      <span class="text-2xl">{{ icon }}</span>
+    </div>
+    <div class="text-3xl font-bold text-gray-900">{{ value }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Recent Vendors -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+    <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-900">Recent Vendor Applications</h3>
+      <a href="/admin/vendors?status=pending" class="text-sm text-blue-600 hover:underline">View all</a>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for vendor in recent_vendors %}
+      <div class="p-4 flex items-center justify-between">
+        <div>
+          <div class="font-medium text-gray-900 text-sm">{{ vendor.business_name }}</div>
+          <div class="text-xs text-gray-400">{{ vendor.user.email }}</div>
+        </div>
+        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+          {% if vendor.status.value == 'approved' %}bg-green-100 text-green-700
+          {% elif vendor.status.value == 'pending' %}bg-yellow-100 text-yellow-700
+          {% else %}bg-red-100 text-red-700{% endif %}">
+          {{ vendor.status.value|capitalize }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+    <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+      <h3 class="font-semibold text-gray-900">Recent Orders</h3>
+      <a href="/admin/orders" class="text-sm text-blue-600 hover:underline">View all</a>
+    </div>
+    <div class="divide-y divide-gray-50">
+      {% for order in recent_orders %}
+      <div class="p-4 flex items-center justify-between">
+        <div>
+          <div class="font-medium text-gray-900 text-sm">#{{ order.order_number }}</div>
+          <div class="text-xs text-gray-400">₹{{ "%.0f"|format(order.total_amount) }}</div>
+        </div>
+        <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+          {{ order.status.value.replace('_', ' ')|title }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

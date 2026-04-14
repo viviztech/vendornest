@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="{{ lang | default('en') }}" class="h-full">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}VendorNest{% endblock %} — VendorNest</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>body{font-family:'Inter',sans-serif;}</style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full bg-gray-50">
+
+<!-- Top Nav -->
+<nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16 items-center">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-sm">VN</span>
+        </div>
+        <span class="text-xl font-bold text-gray-900">VendorNest</span>
+      </a>
+
+      <!-- Center: Search bar -->
+      <form action="/search" method="get" class="hidden md:flex items-center gap-2 flex-1 max-w-md mx-8">
+        <input
+          type="text" name="pincode" placeholder="Enter your pincode..."
+          pattern="[0-9]{6}" maxlength="6"
+          class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+          Find Vendors
+        </button>
+      </form>
+
+      <!-- Right: Nav links -->
+      <div class="flex items-center gap-4">
+        <!-- Language switcher -->
+        <div class="relative" x-data="{ open: false }">
+          <button @click="open=!open" class="text-sm text-gray-600 flex items-center gap-1 hover:text-gray-900">
+            🌐 <span class="hidden sm:inline">{{ lang|upper if lang else 'EN' }}</span>
+          </button>
+          <div x-show="open" @click.outside="open=false"
+               class="absolute right-0 mt-2 w-32 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+            <a href="/set-lang/en" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">English</a>
+            <a href="/set-lang/ta" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">தமிழ்</a>
+            <a href="/set-lang/hi" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">हिंदी</a>
+          </div>
+        </div>
+
+        <!-- Cart -->
+        <a href="/customer/cart" class="relative text-gray-600 hover:text-gray-900">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+        </a>
+
+        {% if user %}
+        <div class="relative" x-data="{ open: false }">
+          <button @click="open=!open" class="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="text-blue-600 font-semibold">{{ user.name[0]|upper }}</span>
+            </div>
+          </button>
+          <div x-show="open" @click.outside="open=false"
+               class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+            {% if user.role == 'superadmin' %}
+            <a href="/admin/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Admin Dashboard</a>
+            {% elif user.role == 'vendor' %}
+            <a href="/vendor/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Vendor Dashboard</a>
+            {% else %}
+            <a href="/customer/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Orders</a>
+            <a href="/customer/services" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Services</a>
+            {% endif %}
+            <hr class="my-1"/>
+            <a href="/auth/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+          </div>
+        </div>
+        {% else %}
+        <a href="/auth/login" class="text-sm font-medium text-gray-700 hover:text-blue-600">Login</a>
+        <a href="/auth/register" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+          Register
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Flash messages -->
+{% if error %}
+<div class="max-w-7xl mx-auto px-4 pt-4">
+  <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{{ error }}</div>
+</div>
+{% endif %}
+{% if success %}
+<div class="max-w-7xl mx-auto px-4 pt-4">
+  <div class="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 text-sm">{{ success }}</div>
+</div>
+{% endif %}
+
+<!-- Main content -->
+<main class="{% block main_class %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8{% endblock %}">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 mt-16">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+            <span class="text-white font-bold text-xs">VN</span>
+          </div>
+          <span class="font-bold text-gray-900">VendorNest</span>
+        </div>
+        <p class="text-sm text-gray-500">Connecting hardware vendors with customers across India.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold text-gray-900 mb-3">For Customers</h4>
+        <ul class="space-y-2 text-sm text-gray-500">
+          <li><a href="/" class="hover:text-blue-600">Find Vendors</a></li>
+          <li><a href="/products" class="hover:text-blue-600">Browse Products</a></li>
+          <li><a href="/auth/register" class="hover:text-blue-600">Register</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold text-gray-900 mb-3">For Vendors</h4>
+        <ul class="space-y-2 text-sm text-gray-500">
+          <li><a href="/auth/vendor/register" class="hover:text-blue-600">Register as Vendor</a></li>
+          <li><a href="/auth/login" class="hover:text-blue-600">Vendor Login</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold text-gray-900 mb-3">Support</h4>
+        <ul class="space-y-2 text-sm text-gray-500">
+          <li><a href="mailto:support@vendornest.in" class="hover:text-blue-600">support@vendornest.in</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-100 mt-8 pt-4 text-center text-xs text-gray-400">
+      © 2025 VendorNest. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

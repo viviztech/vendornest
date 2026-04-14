@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Vendors near {{ pincode }}{% endblock %}
+{% block content %}
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-900">
+    Vendors near <span class="text-blue-600">{{ pincode }}</span>
+    {% if pincode_info.district %}<span class="text-gray-500 text-lg font-normal"> — {{ pincode_info.district }}, {{ pincode_info.state }}</span>{% endif %}
+  </h1>
+  <p class="text-gray-500 mt-1">{{ vendors|length }} vendor(s) found</p>
+</div>
+
+<!-- Filters -->
+<div class="flex gap-3 mb-6 flex-wrap">
+  <form action="/search" method="get" class="flex gap-2 flex-wrap">
+    <input type="hidden" name="pincode" value="{{ pincode }}"/>
+    <select name="brand_id" class="border border-gray-300 rounded-lg px-3 py-2 text-sm" onchange="this.form.submit()">
+      <option value="">All Brands</option>
+      {% for brand in brands %}
+      <option value="{{ brand.id }}" {% if selected_brand_id == brand.id %}selected{% endif %}>{{ brand.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+{% if vendors %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {% for vendor in vendors %}
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
+    <!-- Vendor Header -->
+    <div class="p-5">
+      <div class="flex items-start gap-4">
+        <div class="w-14 h-14 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+          {% if vendor.logo_url %}
+          <img src="{{ vendor.logo_url }}" alt="{{ vendor.business_name }}" class="w-12 h-12 object-contain"/>
+          {% else %}
+          <span class="text-xl font-bold text-blue-600">{{ vendor.business_name[0]|upper }}</span>
+          {% endif %}
+        </div>
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-gray-900 truncate">{{ vendor.business_name }}</h3>
+          <p class="text-sm text-gray-500 mt-0.5">{{ vendor.district.name if vendor.district else '' }}, {{ vendor.state.name if vendor.state else '' }}</p>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-yellow-400 text-sm">★</span>
+            <span class="text-sm text-gray-600">{{ vendor.rating or 'New' }}</span>
+          </div>
+        </div>
+        {% if vendor.is_featured %}
+        <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-medium">Featured</span>
+        {% endif %}
+      </div>
+
+      <!-- Brands -->
+      {% if vendor.brands %}
+      <div class="flex gap-1 mt-3 flex-wrap">
+        {% for vb in vendor.brands[:5] %}
+        {% if vb.verified %}
+        <span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full">{{ vb.brand.name }}</span>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="border-t border-gray-100 p-4 flex gap-2">
+      <a href="/vendor/{{ vendor.business_slug }}?pincode={{ pincode }}"
+         class="flex-1 text-center bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+        Buy Products
+      </a>
+      <a href="/customer/services/book?vendor_id={{ vendor.id }}"
+         class="flex-1 text-center border border-blue-600 text-blue-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors">
+        Book Service
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="text-center py-20">
+  <div class="text-5xl mb-4">🔍</div>
+  <h2 class="text-xl font-semibold text-gray-900 mb-2">No vendors found for {{ pincode }}</h2>
+  <p class="text-gray-500 mb-6">Try a nearby pincode or browse all products.</p>
+  <div class="flex gap-3 justify-center">
+    <a href="/" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">Try Another Pincode</a>
+    <a href="/products" class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-50">Browse All Products</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

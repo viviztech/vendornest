@@ -1,0 +1,72 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ vendor.business_name }}{% endblock %}
+{% block page_title %}Vendor Detail{% endblock %}
+{% block content %}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <!-- Vendor Info -->
+  <div class="lg:col-span-2 space-y-6">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h2 class="font-semibold text-gray-900 mb-4">Business Information</h2>
+      <dl class="grid grid-cols-2 gap-4">
+        <div><dt class="text-xs text-gray-400">Business Name</dt><dd class="font-medium text-gray-900">{{ vendor.business_name }}</dd></div>
+        <div><dt class="text-xs text-gray-400">Owner</dt><dd class="font-medium text-gray-900">{{ vendor.user.name }}</dd></div>
+        <div><dt class="text-xs text-gray-400">Email</dt><dd class="font-medium text-gray-900">{{ vendor.user.email }}</dd></div>
+        <div><dt class="text-xs text-gray-400">Phone</dt><dd class="font-medium text-gray-900">{{ vendor.user.phone or '—' }}</dd></div>
+        <div><dt class="text-xs text-gray-400">GST Number</dt><dd class="font-medium text-gray-900">{{ vendor.gst_number or '—' }}</dd></div>
+        <div><dt class="text-xs text-gray-400">State</dt><dd class="font-medium text-gray-900">{{ vendor.state.name if vendor.state else '—' }}</dd></div>
+        <div class="col-span-2"><dt class="text-xs text-gray-400">Address</dt><dd class="font-medium text-gray-900">{{ vendor.address_line or '—' }}</dd></div>
+      </dl>
+    </div>
+
+    {% if vendor.documents %}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h2 class="font-semibold text-gray-900 mb-4">Documents</h2>
+      <div class="space-y-2">
+        {% for doc in vendor.documents %}
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span class="text-sm text-gray-700">{{ doc.doc_type|replace('_', ' ')|title }}</span>
+          <a href="{{ doc.doc_url }}" target="_blank" class="text-blue-600 text-sm hover:underline">View →</a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Actions -->
+  <div class="space-y-4">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h2 class="font-semibold text-gray-900 mb-4">Status: <span class="text-blue-600">{{ vendor.status.value|capitalize }}</span></h2>
+
+      {% if vendor.status.value == 'pending' %}
+      <form method="post" action="/admin/vendors/{{ vendor.id }}/approve" class="mb-3">
+        <button type="submit" class="w-full bg-green-600 text-white py-2.5 rounded-lg font-medium hover:bg-green-700">
+          ✓ Approve Vendor
+        </button>
+      </form>
+      <form method="post" action="/admin/vendors/{{ vendor.id }}/reject" x-data="{ reason: '' }">
+        <textarea name="reason" placeholder="Rejection reason..." rows="2"
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-red-400"></textarea>
+        <button type="submit" class="w-full bg-red-600 text-white py-2.5 rounded-lg font-medium hover:bg-red-700">
+          ✕ Reject
+        </button>
+      </form>
+      {% elif vendor.status.value == 'approved' %}
+      <form method="post" action="/admin/vendors/{{ vendor.id }}/suspend">
+        <button type="submit" class="w-full bg-orange-500 text-white py-2.5 rounded-lg font-medium hover:bg-orange-600">
+          Suspend Vendor
+        </button>
+      </form>
+      {% elif vendor.status.value == 'suspended' %}
+      <form method="post" action="/admin/vendors/{{ vendor.id }}/approve">
+        <button type="submit" class="w-full bg-green-600 text-white py-2.5 rounded-lg font-medium hover:bg-green-700">
+          Re-Activate
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}
