@@ -2,13 +2,14 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
 from app.database import check_db_connection, check_redis_connection
 
 # ── Routers ───────────────────────────────────────────────────────────────────
+from app.dependencies import LoginRequired
 from app.routers.auth.routes import router as auth_router
 from app.routers.public.search import router as public_router
 from app.routers.admin.dashboard import router as admin_dashboard_router
@@ -39,6 +40,11 @@ app.add_middleware(
     secret_key=settings.app_secret_key,
     max_age=86400,
 )
+
+
+@app.exception_handler(LoginRequired)
+async def login_required_handler(request: Request, exc: LoginRequired):
+    return RedirectResponse(url="/auth/login", status_code=302)
 
 # Static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
