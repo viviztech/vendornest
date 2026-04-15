@@ -46,7 +46,7 @@ LOCATION_DATA = {
     ],
     "Uttar Pradesh": [
         ("Lucknow", [("226001","Lucknow GPO"),("226002","Aminabad"),("226003","Chowk"),("226004","Hazratganj"),("226005","Aliganj"),("226006","Gomtinagar"),("226007","Alambagh"),("226008","Indira Nagar"),("226009","Mahanagar"),("226010","Rajajipuram"),("226011","Vikas Nagar"),("226012","Telibagh"),("226013","Faizabad Road"),("226014","Kursi Road"),("226016","Malihabad"),("226017","Kakori"),("226018","Mohanlalganj"),("226019","Sarojini Nagar Lucknow"),("226020","Chinhat"),("226021","Bakshi Ka Talab"),("226022","Gosainganj"),("226023","Sadar Lucknow"),("226024","Bijnaur"),("226025","Lucknow Cantt")]),
-        ("Agra", [("282001","Agra GPO"),("282002","Agra Cantt"),("282003","Kamla Nagar Agra"),("282004","Shahganj"),("282005","Artoni"),("282006","Bodla"),("282007","Nunhai"),("282008","Tajganj"),("282009","Mantola"),("282010","Sadar Agra"),("282001","Agra City"),("282002","Dayal Bagh"),("282003","Sikandra"),("282004","Fatehabad"),("282005","Kiraoli"),("282006","Bah"),("282007","Etmadpur"),("282008","Khandauli"),("282009","Pinahat"),("282010","Fatehpur Sikri")]),
+        ("Agra", [("282001","Agra GPO"),("282002","Agra Cantt"),("282003","Kamla Nagar Agra"),("282004","Shahganj"),("282005","Artoni"),("282006","Bodla"),("282007","Nunhai"),("282008","Tajganj"),("282009","Mantola"),("282010","Sadar Agra"),("282011","Dayal Bagh"),("282012","Sikandra"),("282013","Fatehabad"),("282014","Kiraoli"),("282015","Bah"),("282016","Etmadpur"),("282017","Khandauli"),("282018","Pinahat"),("282019","Fatehpur Sikri"),("282020","Firozabad"),("282021","Shikohabad"),("282022","Tundla"),("282023","Jalesar"),("282024","Mathura"),("282025","Vrindavan"),("282026","Govardhan"),("282027","Bharatpur"),("282028","Deeg"),("282029","Kosi Kalan"),("282030","Chhata")]),
         ("Varanasi", [("221001","Varanasi GPO"),("221002","Varanasi Cantt"),("221003","Kamachha"),("221004","Sunderpur"),("221005","Lanka"),("221006","Bhelupur"),("221007","Pandeypur"),("221008","Shivpur"),("221009","Sarnath"),("221010","Sigra"),("221011","Nadesar"),("221012","Maldahiya"),("221013","Orderly Bazar"),("221014","Assi"),("221015","Ramnagar Varanasi"),("221016","Cholapur"),("221017","Pindra"),("221018","Varanasi Rural"),("221019","Varanasi Town"),("221020","Durgakund")]),
     ],
     "Gujarat": [
@@ -143,7 +143,11 @@ def seed(db):
                 total_districts += 1
             district_cache[key] = district.id
 
+            seen = set()
             for pincode_val, office_name in pincodes:
+                if pincode_val in seen:
+                    continue
+                seen.add(pincode_val)
                 existing = db.query(Pincode).filter_by(pincode=pincode_val).first()
                 if not existing:
                     db.add(Pincode(
