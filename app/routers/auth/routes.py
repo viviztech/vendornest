@@ -36,18 +36,28 @@ def register(
         return templates.TemplateResponse("auth/register.html", {
             "request": request, "error": "Email already registered. Please login."
         })
-    user = User(
-        email=email,
-        name=name.strip(),
-        phone=phone.strip(),
-        hashed_password=auth_svc.hash_password(password),
-        role=UserRole.customer,
-    )
-    db.add(user)
-    db.flush()
-    customer = Customer(user_id=user.id, name=name.strip(), email=email, phone=phone.strip())
-    db.add(customer)
-    db.commit()
+    if db.query(User).filter_by(phone=phone.strip()).first():
+        return templates.TemplateResponse("auth/register.html", {
+            "request": request, "error": "Phone number already registered. Please login."
+        })
+    try:
+        user = User(
+            email=email,
+            name=name.strip(),
+            phone=phone.strip(),
+            hashed_password=auth_svc.hash_password(password),
+            role=UserRole.customer,
+        )
+        db.add(user)
+        db.flush()
+        customer = Customer(user_id=user.id, name=name.strip(), email=email, phone=phone.strip())
+        db.add(customer)
+        db.commit()
+    except Exception:
+        db.rollback()
+        return templates.TemplateResponse("auth/register.html", {
+            "request": request, "error": "Registration failed. Please try again."
+        })
 
     otp = auth_svc.create_otp_record(db, email, purpose="verify")
     send_otp_email(to=email, otp=otp, name=name)
@@ -227,27 +237,44 @@ def vendor_register(
             "error": "Email already registered."
         })
 
-    from slugify import slugify
-    user = User(
-        email=email, name=name.strip(), phone=phone.strip(),
-        hashed_password=auth_svc.hash_password(password),
-        role=UserRole.vendor,
-    )
-    db.add(user)
-    db.flush()
+    # Check phone uniqueness
+    from app.models.user import User as UserModel
+    if db.query(UserModel).filter_by(phone=phone.strip()).first():
+        states = db.query(State).filter_by(is_active=True).order_by(State.name).all()
+        return templates.TemplateResponse("auth/vendor_register.html", {
+            "request": request, "states": states,
+            "error": "Phone number already registered. Please login or use a different number."
+        })
 
-    vendor = Vendor(
-        user_id=user.id,
-        business_name=business_name.strip(),
-        business_slug=slugify(business_name),
-        gst_number=gst_number.strip() or None,
-        state_id=state_id,
-        district_id=district_id,
-        pincode_id=pincode_id,
-        address_line=address_line.strip(),
-    )
-    db.add(vendor)
-    db.commit()
+    from slugify import slugify
+    try:
+        user = User(
+            email=email, name=name.strip(), phone=phone.strip(),
+            hashed_password=auth_svc.hash_password(password),
+            role=UserRole.vendor,
+        )
+        db.add(user)
+        db.flush()
+
+        vendor = Vendor(
+            user_id=user.id,
+            business_name=business_name.strip(),
+            business_slug=slugify(business_name),
+            gst_number=gst_number.strip() or None,
+            state_id=state_id,
+            district_id=district_id,
+            pincode_id=pincode_id,
+            address_line=address_line.strip(),
+        )
+        db.add(vendor)
+        db.commit()
+    except Exception:
+        db.rollback()
+        states = db.query(State).filter_by(is_active=True).order_by(State.name).all()
+        return templates.TemplateResponse("auth/vendor_register.html", {
+            "request": request, "states": states,
+            "error": "Registration failed. Email or phone may already be registered."
+        })
 
     otp = auth_svc.create_otp_record(db, email, purpose="verify")
     send_otp_email(to=email, otp=otp, name=name)
