@@ -167,6 +167,22 @@ def product_detail(
     })
 
 
+@router.get("/api/districts")
+def get_districts(state_id: int = Query(...), db: Session = Depends(get_db)):
+    from app.models.location import District
+    from fastapi.responses import JSONResponse
+    districts = db.query(District).filter_by(state_id=state_id).order_by(District.name).all()
+    return JSONResponse([{"id": d.id, "name": d.name} for d in districts])
+
+
+@router.get("/api/pincodes")
+def get_pincodes(district_id: int = Query(...), db: Session = Depends(get_db)):
+    from app.models.location import Pincode
+    from fastapi.responses import JSONResponse
+    pincodes = db.query(Pincode).filter_by(district_id=district_id, is_active=True).order_by(Pincode.pincode).all()
+    return JSONResponse([{"id": p.id, "pincode": p.pincode, "office": p.post_office} for p in pincodes])
+
+
 @router.get("/set-lang/{lang}")
 def set_language(lang: str, request: Request):
     from fastapi.responses import RedirectResponse
