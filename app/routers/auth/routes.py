@@ -29,6 +29,8 @@ def register(
     email: str = Form(...),
     phone: str = Form(...),
     password: str = Form(...),
+    city: str = Form(""),
+    pincode: str = Form(""),
     db: Session = Depends(get_db),
 ):
     email = email.lower().strip()
@@ -50,7 +52,10 @@ def register(
         )
         db.add(user)
         db.flush()
-        customer = Customer(user_id=user.id, name=name.strip(), email=email, phone=phone.strip())
+        customer = Customer(
+            user_id=user.id, name=name.strip(), email=email, phone=phone.strip(),
+            city=city.strip() or None, pincode=pincode.strip() or None,
+        )
         db.add(customer)
         db.commit()
     except Exception:
@@ -220,6 +225,7 @@ def vendor_register(
     phone: str = Form(...),
     password: str = Form(...),
     business_name: str = Form(...),
+    description: str = Form(""),
     gst_number: str = Form(""),
     state_id: int = Form(...),
     district_id: int = Form(...),
@@ -260,6 +266,7 @@ def vendor_register(
             user_id=user.id,
             business_name=business_name.strip(),
             business_slug=slugify(business_name),
+            description=description.strip() or None,
             gst_number=gst_number.strip() or None,
             state_id=state_id,
             district_id=district_id,

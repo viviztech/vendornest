@@ -1,0 +1,63 @@
+{% extends "customer/base_customer.html" %}
+{% block title %}My Enquiries{% endblock %}
+
+{% block customer_content %}
+<div class="flex justify-between items-center mb-6">
+  <div>
+    <h2 class="text-xl font-bold text-gray-900">My Enquiries</h2>
+    <p class="text-sm text-gray-500 mt-1">{{ enquiries|length }} enquiry(s) submitted</p>
+  </div>
+  <a href="/customer/enquiries/new"
+     class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+    + New Enquiry
+  </a>
+</div>
+
+<div class="space-y-4">
+  {% for enq in enquiries %}
+  <div class="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
+    <div class="flex items-start justify-between">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xs font-mono text-gray-400">#{{ enq.enquiry_number }}</span>
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium
+            {% if enq.status.value == 'quoted' %}bg-green-100 text-green-700
+            {% elif enq.status.value == 'closed' %}bg-gray-100 text-gray-600
+            {% elif enq.status.value == 'expired' %}bg-red-100 text-red-600
+            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+            {{ enq.status.value|capitalize }}
+          </span>
+        </div>
+        <p class="font-semibold text-gray-900">{{ enq.product_service_type }}</p>
+        <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ enq.description }}</p>
+        <div class="flex items-center gap-4 mt-2 text-xs text-gray-400">
+          <span>📍 {{ enq.location }} — {{ enq.pincode }}</span>
+          <span>{{ enq.created_at.strftime('%d %b %Y, %H:%M') }}</span>
+        </div>
+      </div>
+      <div class="ml-4 text-right">
+        {% set quote_count = enq.responses|length %}
+        <div class="text-2xl font-bold text-blue-600">{{ quote_count }}</div>
+        <div class="text-xs text-gray-400">quote{{ 's' if quote_count != 1 else '' }}</div>
+      </div>
+    </div>
+    <div class="mt-3 pt-3 border-t border-gray-100">
+      <a href="/customer/enquiries/{{ enq.enquiry_number }}"
+         class="text-sm text-blue-600 hover:underline font-medium">
+        View details &amp; quotes →
+      </a>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-20 text-gray-400">
+    <div class="text-6xl mb-4">📋</div>
+    <p class="text-lg font-medium text-gray-500">No enquiries yet</p>
+    <p class="text-sm mt-1">Submit your first IT product or service enquiry and get quotes from vendors.</p>
+    <a href="/customer/enquiries/new"
+       class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+      Submit Enquiry
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

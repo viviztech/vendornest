@@ -9,6 +9,7 @@ from app.models.b2b import B2BQuote, B2BQuoteItem, B2BMessage
 from app.models.commission import CommissionConfig, Settlement
 from app.models.notification import NotificationTemplate, NotificationLog, TranslationString
 from app.models.customer import Customer, CustomerAddress
+from app.models.enquiry import Enquiry, EnquiryVendorResponse, EnquiryMessage
 
 __all__ = [
     "State", "District", "Taluk", "Pincode",
@@ -21,4 +22,5 @@ __all__ = [
     "CommissionConfig", "Settlement",
     "NotificationTemplate", "NotificationLog", "TranslationString",
     "Customer", "CustomerAddress",
+    "Enquiry", "EnquiryVendorResponse", "EnquiryMessage",
 ]

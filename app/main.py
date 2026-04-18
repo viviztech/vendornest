@@ -25,6 +25,9 @@ from app.routers.customer.profile import router as customer_profile_router
 from app.routers.customer.orders import router as customer_orders_router
 from app.routers.customer.service import router as customer_service_router
 from app.routers.customer.b2b import router as customer_b2b_router
+from app.routers.customer.enquiry import router as customer_enquiry_router
+from app.routers.vendor.enquiry import router as vendor_enquiry_router
+from app.routers.admin.enquiries import router as admin_enquiry_router
 
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -67,6 +70,9 @@ app.include_router(customer_profile_router)
 app.include_router(customer_orders_router)
 app.include_router(customer_service_router)
 app.include_router(customer_b2b_router)
+app.include_router(customer_enquiry_router)
+app.include_router(vendor_enquiry_router)
+app.include_router(admin_enquiry_router)
 
 
 # ── Health check ──────────────────────────────────────────────────────────────

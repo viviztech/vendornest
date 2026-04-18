@@ -1,0 +1,69 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Enquiries{% endblock %}
+{% block page_title %}All Customer Enquiries{% endblock %}
+
+{% block content %}
+<!-- Status filter -->
+<div class="flex gap-2 mb-6 flex-wrap">
+  <a href="/admin/enquiries"
+     class="px-3 py-1.5 rounded-lg text-sm font-medium border
+            {% if not current_status %}bg-gray-900 text-white border-gray-900{% else %}border-gray-300 text-gray-600 hover:bg-gray-50{% endif %}">
+    All
+  </a>
+  {% for s in statuses %}
+  <a href="/admin/enquiries?status={{ s }}"
+     class="px-3 py-1.5 rounded-lg text-sm font-medium border
+            {% if current_status == s %}bg-blue-600 text-white border-blue-600{% else %}border-gray-300 text-gray-600 hover:bg-gray-50{% endif %}">
+    {{ s|capitalize }}
+  </a>
+  {% endfor %}
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Enquiry #</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pincode</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quotes</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+        <th class="px-4 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for enq in enquiries %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-3 font-mono text-xs text-gray-500">{{ enq.enquiry_number }}</td>
+        <td class="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">{{ enq.product_service_type }}</td>
+        <td class="px-4 py-3 text-gray-600">{{ enq.location }}</td>
+        <td class="px-4 py-3 text-gray-600">{{ enq.pincode }}</td>
+        <td class="px-4 py-3">
+          <span class="font-semibold text-blue-600">{{ enq.responses|length }}</span>
+        </td>
+        <td class="px-4 py-3">
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium
+            {% if enq.status.value == 'quoted' %}bg-green-100 text-green-700
+            {% elif enq.status.value == 'closed' %}bg-gray-100 text-gray-600
+            {% elif enq.status.value == 'expired' %}bg-red-100 text-red-600
+            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+            {{ enq.status.value|capitalize }}
+          </span>
+        </td>
+        <td class="px-4 py-3 text-gray-500 text-xs">{{ enq.created_at.strftime('%d %b %Y') }}</td>
+        <td class="px-4 py-3">
+          <a href="/admin/enquiries/{{ enq.enquiry_number }}"
+             class="text-blue-600 hover:underline text-xs font-medium">View</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" class="px-4 py-16 text-center text-gray-400">No enquiries found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -7,9 +7,9 @@
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
       <div class="text-sm font-semibold text-gray-500 mb-3">My Account</div>
       {% set nav = [
+        ('/customer/enquiries', 'My Enquiries', '📋'),
         ('/customer/orders', 'My Orders', '📦'),
         ('/customer/services', 'Service Requests', '🔧'),
-        ('/customer/b2b', 'B2B Quotes', '🏢'),
         ('/customer/cart', 'Cart', '🛒'),
       ] %}
       {% for href, label, icon in nav %}

@@ -3,6 +3,26 @@
 {% block page_title %}Dashboard{% endblock %}
 {% block content %}
 
+<!-- Enquiry Stats -->
+<div class="grid grid-cols-4 gap-4 mb-6">
+  <a href="/admin/enquiries" class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:border-blue-300 transition-colors">
+    <div class="text-gray-400 text-xs uppercase tracking-wide mb-1">Total Enquiries</div>
+    <div class="text-3xl font-bold text-gray-900">{{ stats.total_enquiries }}</div>
+  </a>
+  <a href="/admin/enquiries?status=open" class="bg-white rounded-xl border border-yellow-200 p-5 shadow-sm hover:border-yellow-400 transition-colors">
+    <div class="text-yellow-600 text-xs uppercase tracking-wide mb-1">Open</div>
+    <div class="text-3xl font-bold text-yellow-600">{{ stats.open_enquiries }}</div>
+  </a>
+  <a href="/admin/enquiries?status=quoted" class="bg-white rounded-xl border border-blue-200 p-5 shadow-sm hover:border-blue-400 transition-colors">
+    <div class="text-blue-600 text-xs uppercase tracking-wide mb-1">Quoted</div>
+    <div class="text-3xl font-bold text-blue-600">{{ stats.quoted_enquiries }}</div>
+  </a>
+  <a href="/admin/enquiries?status=closed" class="bg-white rounded-xl border border-green-200 p-5 shadow-sm hover:border-green-400 transition-colors">
+    <div class="text-green-600 text-xs uppercase tracking-wide mb-1">Closed / Accepted</div>
+    <div class="text-3xl font-bold text-green-600">{{ stats.closed_enquiries }}</div>
+  </a>
+</div>
+
 <!-- Stats Grid -->
 <div class="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
   {% set stat_cards = [

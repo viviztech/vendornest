@@ -127,6 +127,74 @@ def send_service_booking_email(to: str, name: str, request_number: str, date: st
     return send_email(to, subject, html)
 
 
+def send_enquiry_submitted_email(to: str, enquiry_number: str) -> bool:
+    """Notify admin that a new enquiry was submitted."""
+    subject = f"New Enquiry #{enquiry_number} — VendorNest"
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:8px;">
+      <h2 style="color:#1d4ed8;">New Enquiry Received</h2>
+      <p>A new customer enquiry <strong>#{enquiry_number}</strong> has been submitted and broadcast to all vendors.</p>
+      <a href="{settings.app_base_url}/admin/enquiries/{enquiry_number}"
+         style="display:inline-block;padding:12px 24px;background:#1d4ed8;color:white;border-radius:6px;text-decoration:none;">
+        View Enquiry
+      </a>
+    </div>
+    """
+    return send_email(to, subject, html)
+
+
+def send_vendor_new_enquiry_email(to: str, vendor_name: str, enquiry_number: str, product_type: str) -> bool:
+    """Notify a vendor that a new enquiry is available."""
+    subject = f"New Enquiry Available — #{enquiry_number}"
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:8px;">
+      <h2 style="color:#1d4ed8;">New Enquiry Available</h2>
+      <p>Hello {vendor_name},</p>
+      <p>A customer has submitted an enquiry for <strong>{product_type}</strong> (Ref: #{enquiry_number}).</p>
+      <p>Submit your quote through the portal before others do!</p>
+      <a href="{settings.app_base_url}/vendor/enquiries/{enquiry_number}"
+         style="display:inline-block;padding:12px 24px;background:#1d4ed8;color:white;border-radius:6px;text-decoration:none;">
+        View &amp; Quote
+      </a>
+      <p style="color:#6b7280;font-size:12px;margin-top:16px;">Do NOT share your contact details in messages — all communication must stay within the portal.</p>
+    </div>
+    """
+    return send_email(to, subject, html)
+
+
+def send_customer_quote_received_email(to: str, enquiry_number: str, product_type: str) -> bool:
+    """Notify customer that a vendor has submitted a quote."""
+    subject = f"You have a new quote — Enquiry #{enquiry_number}"
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:8px;">
+      <h2 style="color:#1d4ed8;">New Quote Received</h2>
+      <p>A vendor has submitted a quote for your enquiry about <strong>{product_type}</strong> (#{enquiry_number}).</p>
+      <p>Log in to review the quote and send a follow-up if needed.</p>
+      <a href="{settings.app_base_url}/customer/enquiries/{enquiry_number}"
+         style="display:inline-block;padding:12px 24px;background:#1d4ed8;color:white;border-radius:6px;text-decoration:none;">
+        View Quote
+      </a>
+    </div>
+    """
+    return send_email(to, subject, html)
+
+
+def send_followup_notification_email(to: str, role: str, enquiry_number: str) -> bool:
+    """Notify the other party that a follow-up message was posted."""
+    subject = f"New message on Enquiry #{enquiry_number}"
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:8px;">
+      <h2 style="color:#1d4ed8;">New Follow-up Message</h2>
+      <p>There is a new message from the {role} on enquiry <strong>#{enquiry_number}</strong>.</p>
+      <a href="{settings.app_base_url}/customer/enquiries/{enquiry_number}"
+         style="display:inline-block;padding:12px 24px;background:#1d4ed8;color:white;border-radius:6px;text-decoration:none;">
+        View Message
+      </a>
+    </div>
+    """
+    return send_email(to, subject, html)
+
+
 # ── Stubs for future SMS / WhatsApp ───────────────────────────────────────────
 def send_sms(phone: str, message: str) -> bool:
     logger.info(f"[SMS STUB] To {phone}: {message}")

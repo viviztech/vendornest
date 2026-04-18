@@ -1,0 +1,52 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Customer Enquiries{% endblock %}
+{% block page_title %}Customer Enquiries{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <p class="text-sm text-gray-500">{{ enquiries|length }} active enquiry(s) from customers</p>
+</div>
+
+<div class="space-y-4">
+  {% for enq in enquiries %}
+  {% set my_resp = my_responses.get(enq.id) %}
+  <div class="bg-white rounded-xl border {% if my_resp %}border-green-200{% else %}border-gray-200{% endif %} p-5">
+    <div class="flex items-start justify-between">
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xs font-mono text-gray-400">#{{ enq.enquiry_number }}</span>
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium
+            {% if enq.status.value == 'quoted' %}bg-green-100 text-green-700
+            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+            {{ enq.status.value|capitalize }}
+          </span>
+          {% if my_resp %}
+          <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+            ✓ You quoted ₹{{ "{:,.2f}".format(my_resp.price) }}
+          </span>
+          {% endif %}
+        </div>
+        <p class="font-semibold text-gray-900">{{ enq.product_service_type }}</p>
+        <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ enq.description }}</p>
+        <div class="flex items-center gap-4 mt-2 text-xs text-gray-400">
+          <!-- Privacy: only location + pincode shown, no customer identity -->
+          <span>📍 {{ enq.location }} — {{ enq.pincode }}</span>
+          <span>{{ enq.created_at.strftime('%d %b %Y, %H:%M') }}</span>
+          <span>{{ enq.responses|length }} vendor response(s)</span>
+        </div>
+      </div>
+      <a href="/vendor/enquiries/{{ enq.enquiry_number }}"
+         class="ml-4 {% if my_resp %}bg-gray-100 text-gray-600{% else %}bg-blue-600 text-white{% endif %} px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 whitespace-nowrap">
+        {% if my_resp %}View Thread{% else %}Submit Quote{% endif %}
+      </a>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-20 text-gray-400">
+    <div class="text-6xl mb-4">📭</div>
+    <p class="text-lg font-medium text-gray-500">No open enquiries right now</p>
+    <p class="text-sm mt-1">New customer enquiries will appear here automatically.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

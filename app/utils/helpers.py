@@ -1,4 +1,5 @@
 """Utility helpers."""
+import re
 import random
 import string
 from datetime import datetime
@@ -25,6 +26,31 @@ def generate_quote_number() -> str:
 
 def generate_settlement_number() -> str:
     return generate_request_number("ST")
+
+
+def generate_enquiry_number() -> str:
+    return generate_request_number("ENQ")
+
+
+# Patterns that could reveal phone or email — blocked in portal messages
+_PHONE_RE = re.compile(
+    r"(\+?91[\s\-]?)?[6-9]\d{9}"          # Indian mobile
+    r"|(\+?1[\s\-]?)?\(?\d{3}\)?[\s\-]\d{3}[\s\-]\d{4}",  # International
+    re.IGNORECASE,
+)
+_EMAIL_RE = re.compile(r"[a-zA-Z0-9_.+\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z]{2,}", re.IGNORECASE)
+
+
+def contains_contact_info(text: str) -> bool:
+    """Return True if text contains a phone number or email address."""
+    return bool(_PHONE_RE.search(text) or _EMAIL_RE.search(text))
+
+
+def sanitize_message(text: str) -> str:
+    """Replace detected contact info with [BLOCKED] to prevent direct contact sharing."""
+    text = _PHONE_RE.sub("[BLOCKED]", text)
+    text = _EMAIL_RE.sub("[BLOCKED]", text)
+    return text
 
 
 def format_currency(amount: float) -> str:

@@ -11,6 +11,7 @@ from app.models.user import User
 from app.models.vendor import Vendor, VendorStatus
 from app.models.order import Order, OrderStatus
 from app.models.service import ServiceRequest
+from app.models.enquiry import Enquiry, EnquiryStatus
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory="app/templates")
@@ -27,6 +28,10 @@ def dashboard(request: Request, db: Session = Depends(get_db), admin=Depends(req
             Order.status.notin_([OrderStatus.pending_payment, OrderStatus.payment_failed])
         ).count(),
         "pending_services": db.query(ServiceRequest).filter_by(status="pending").count(),
+        "total_enquiries": db.query(Enquiry).count(),
+        "open_enquiries": db.query(Enquiry).filter_by(status=EnquiryStatus.open).count(),
+        "quoted_enquiries": db.query(Enquiry).filter_by(status=EnquiryStatus.quoted).count(),
+        "closed_enquiries": db.query(Enquiry).filter_by(status=EnquiryStatus.closed).count(),
     }
     recent_vendors = db.query(Vendor).order_by(Vendor.created_at.desc()).limit(5).all()
     recent_orders = db.query(Order).order_by(Order.created_at.desc()).limit(5).all()

@@ -1,0 +1,140 @@
+{% extends "customer/base_customer.html" %}
+{% block title %}Enquiry #{{ enquiry.enquiry_number }}{% endblock %}
+
+{% block customer_content %}
+<div class="max-w-3xl space-y-5">
+
+  <!-- Enquiry summary -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <div class="flex items-center gap-3 mb-1">
+          <span class="text-xs font-mono text-gray-400">#{{ enquiry.enquiry_number }}</span>
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium
+            {% if enquiry.status.value == 'quoted' %}bg-green-100 text-green-700
+            {% elif enquiry.status.value == 'closed' %}bg-gray-100 text-gray-600
+            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+            {{ enquiry.status.value|capitalize }}
+          </span>
+        </div>
+        <h2 class="text-lg font-bold text-gray-900">{{ enquiry.product_service_type }}</h2>
+      </div>
+      <span class="text-xs text-gray-400">{{ enquiry.created_at.strftime('%d %b %Y') }}</span>
+    </div>
+    <p class="text-sm text-gray-700 mb-4">{{ enquiry.description }}</p>
+    <div class="flex items-center gap-6 text-sm text-gray-500">
+      <span>📍 {{ enquiry.location }}</span>
+      <span>🔢 {{ enquiry.pincode }}</span>
+      <span>💬 {{ enquiry.responses|length }} quote(s) received</span>
+    </div>
+  </div>
+
+  <!-- Vendor quotes (identity hidden) -->
+  <div>
+    <h3 class="text-base font-semibold text-gray-900 mb-3">Vendor Quotes</h3>
+
+    {% if enquiry.responses %}
+    <div class="space-y-4">
+      {% for resp in enquiry.responses %}
+      {% set vendor_index = loop.index %}
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <!-- Quote header -->
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <span class="text-blue-600 font-bold text-sm">V{{ loop.index }}</span>
+            </div>
+            <div>
+              <span class="text-sm font-semibold text-gray-800">Vendor {{ loop.index }}</span>
+              <span class="ml-2 text-xs text-gray-400">(identity protected)</span>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+            {{ resp.status.value|capitalize }}
+          </span>
+        </div>
+
+        <!-- Quote details -->
+        <div class="px-6 py-4 grid grid-cols-2 gap-4 border-b border-gray-100">
+          <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Quoted Price</p>
+            <p class="text-xl font-bold text-green-600">₹{{ "{:,.2f}".format(resp.price) }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">ETA</p>
+            <p class="text-sm font-semibold text-gray-800">{{ resp.eta }}</p>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-b border-gray-100">
+          <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Message from Vendor</p>
+          <p class="text-sm text-gray-700">{{ resp.message }}</p>
+        </div>
+
+        <!-- Message thread -->
+        {% if resp.messages %}
+        <div class="divide-y divide-gray-50">
+          {% for msg in resp.messages %}
+          <div class="px-6 py-3 {% if msg.sender_role == 'customer' %}bg-blue-50{% elif msg.sender_role == 'admin' %}bg-purple-50{% endif %}">
+            <p class="text-xs text-gray-400 mb-1">
+              {% if msg.sender_role == 'customer' %}You
+              {% elif msg.sender_role == 'admin' %}Admin
+              {% else %}Vendor {{ vendor_index }}{% endif %}
+              · {{ msg.created_at.strftime('%d %b %H:%M') }}
+            </p>
+            <p class="text-sm text-gray-800">{{ msg.message }}</p>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Accept quote + follow-up -->
+        {% if enquiry.status.value != 'closed' %}
+        <div class="px-6 py-4 bg-gray-50 space-y-3">
+          <!-- Accept button (only shown if not already accepted/rejected) -->
+          {% if resp.status.value == 'submitted' or resp.status.value == 'followup' %}
+          <form method="post"
+                action="/customer/enquiries/{{ enquiry.enquiry_number }}/accept/{{ resp.id }}"
+                onsubmit="return confirm('Accept this quote from Vendor {{ vendor_index }}? All other quotes will be rejected and the enquiry will close.')">
+            <button type="submit"
+                    class="w-full bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">
+              ✓ Accept This Quote
+            </button>
+          </form>
+          {% endif %}
+          <form method="post"
+                action="/customer/enquiries/{{ enquiry.enquiry_number }}/message/{{ resp.id }}"
+                class="flex gap-3">
+            <input type="text" name="message" required maxlength="1000"
+                   placeholder="Send a follow-up message to this vendor… (no phone/email)"
+                   class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 whitespace-nowrap">
+              Send
+            </button>
+          </form>
+        </div>
+        {% elif resp.status.value == 'accepted' %}
+        <div class="px-6 py-3 bg-green-50 border-t border-green-100">
+          <p class="text-sm text-green-700 font-semibold">✓ Quote Accepted — deal confirmed</p>
+        </div>
+        {% elif resp.status.value == 'rejected' %}
+        <div class="px-6 py-3 bg-gray-50 border-t border-gray-100">
+          <p class="text-sm text-gray-400">Not selected</p>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="bg-white rounded-xl border border-gray-200 py-16 text-center text-gray-400">
+      <div class="text-5xl mb-3">⏳</div>
+      <p class="font-medium text-gray-500">Waiting for vendor quotes</p>
+      <p class="text-sm mt-1">All vendors have been notified. Quotes will appear here once submitted.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <a href="/customer/enquiries" class="text-sm text-blue-600 hover:underline">← Back to all enquiries</a>
+</div>
+{% endblock %}

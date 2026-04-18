@@ -14,6 +14,8 @@ class Customer(Base):
     name = Column(String(200), nullable=False)
     email = Column(String(255))
     phone = Column(String(15))
+    city = Column(String(200))
+    pincode = Column(String(6))
     is_b2b = Column(Boolean, default=False)
     company_name = Column(String(300))
     gst_number = Column(String(20))
@@ -25,6 +27,7 @@ class Customer(Base):
     orders = relationship("Order", back_populates="customer")
     service_requests = relationship("ServiceRequest", back_populates="customer")
     b2b_quotes = relationship("B2BQuote", back_populates="customer")
+    enquiries = relationship("Enquiry", back_populates="customer")
 
 
 class CustomerAddress(Base):
