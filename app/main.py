@@ -56,25 +56,34 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 # ── Include routers ───────────────────────────────────────────────────────────
+# Auth first, then all specific authenticated routes BEFORE public wildcard routes
 app.include_router(auth_router)
-app.include_router(public_router)
+
+# Admin
 app.include_router(admin_dashboard_router)
 app.include_router(admin_vendors_router)
 app.include_router(admin_brands_router)
 app.include_router(admin_commissions_router)
 app.include_router(admin_orders_router)
+app.include_router(admin_enquiry_router)
+
+# Vendor (must be before public_router which has /vendor/{slug})
 app.include_router(vendor_dashboard_router)
 app.include_router(vendor_products_router)
 app.include_router(vendor_orders_router)
 app.include_router(vendor_service_router)
 app.include_router(vendor_pincodes_router)
+app.include_router(vendor_enquiry_router)
+
+# Customer
 app.include_router(customer_profile_router)
 app.include_router(customer_orders_router)
 app.include_router(customer_service_router)
 app.include_router(customer_b2b_router)
 app.include_router(customer_enquiry_router)
-app.include_router(vendor_enquiry_router)
-app.include_router(admin_enquiry_router)
+
+# Public (wildcard routes like /vendor/{slug} must come LAST)
+app.include_router(public_router)
 
 
 # ── Health check ──────────────────────────────────────────────────────────────
