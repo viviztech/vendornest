@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import get_current_user_optional
 from app.services.pincode import get_vendors_by_pincode, get_pincode_info
 from app.models.product import Brand, Category, VendorProduct
 from app.models.vendor import Vendor, VendorStatus
@@ -15,7 +16,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/", response_class=HTMLResponse)
-def homepage(request: Request, db: Session = Depends(get_db)):
+def homepage(request: Request, db: Session = Depends(get_db), user=Depends(get_current_user_optional)):
     brands = db.query(Brand).filter_by(is_active=True).order_by(Brand.sort_order).limit(12).all()
     categories = db.query(Category).filter(
         Category.parent_id == None, Category.is_active == True
@@ -23,7 +24,7 @@ def homepage(request: Request, db: Session = Depends(get_db)):
     lang = get_lang(request)
     return templates.TemplateResponse("public/home.html", {
         "request": request, "brands": brands,
-        "categories": categories, "lang": lang,
+        "categories": categories, "lang": lang, "user": user,
     })
 
 
@@ -34,6 +35,7 @@ def search_vendors(
     brand_id: int = Query(None),
     category_id: int = Query(None),
     db: Session = Depends(get_db),
+    user=Depends(get_current_user_optional),
 ):
     lang = get_lang(request)
     pincode_info = get_pincode_info(db, pincode)
@@ -53,14 +55,10 @@ def search_vendors(
     ).all()
 
     return templates.TemplateResponse("public/search_results.html", {
-        "request": request,
-        "vendors": vendors,
-        "pincode": pincode,
-        "pincode_info": pincode_info,
-        "brands": brands,
-        "categories": categories,
-        "selected_brand_id": brand_id,
-        "lang": lang,
+        "request": request, "user": user,
+        "vendors": vendors, "pincode": pincode,
+        "pincode_info": pincode_info, "brands": brands,
+        "categories": categories, "selected_brand_id": brand_id, "lang": lang,
     })
 
 
@@ -69,6 +67,7 @@ def vendor_profile(
     request: Request,
     slug: str,
     db: Session = Depends(get_db),
+    user=Depends(get_current_user_optional),
 ):
     vendor = db.query(Vendor).filter(
         Vendor.business_slug == slug,
@@ -85,11 +84,9 @@ def vendor_profile(
     vendor_brands = db.query(VendorBrand).filter_by(vendor_id=vendor.id, verified=True).all()
 
     return templates.TemplateResponse("public/vendor_profile.html", {
-        "request": request,
-        "vendor": vendor,
-        "products": products,
-        "vendor_brands": vendor_brands,
-        "lang": lang,
+        "request": request, "user": user,
+        "vendor": vendor, "products": products,
+        "vendor_brands": vendor_brands, "lang": lang,
     })
 
 
@@ -101,6 +98,7 @@ def browse_products(
     q: str = Query(None),
     page: int = Query(1),
     db: Session = Depends(get_db),
+    user=Depends(get_current_user_optional),
 ):
     from app.models.product import Product
     query = db.query(Product).filter_by(is_active=True, is_approved=True)
@@ -121,17 +119,11 @@ def browse_products(
     ).all()
 
     return templates.TemplateResponse("public/products.html", {
-        "request": request,
-        "products": products,
-        "brands": brands,
-        "categories": categories,
-        "total": total,
-        "page": page,
-        "pages": (total + size - 1) // size,
-        "selected_brand_id": brand_id,
-        "selected_category_id": category_id,
-        "query": q,
-        "lang": get_lang(request),
+        "request": request, "user": user,
+        "products": products, "brands": brands, "categories": categories,
+        "total": total, "page": page, "pages": (total + size - 1) // size,
+        "selected_brand_id": brand_id, "selected_category_id": category_id,
+        "query": q, "lang": get_lang(request),
     })
 
 
@@ -140,6 +132,7 @@ def product_detail(
     request: Request,
     vendor_product_id: int,
     db: Session = Depends(get_db),
+    user=Depends(get_current_user_optional),
 ):
     listing = db.query(VendorProduct).filter_by(
         id=vendor_product_id, is_active=True
@@ -154,10 +147,8 @@ def product_detail(
     ).limit(4).all()
 
     return templates.TemplateResponse("public/product_detail.html", {
-        "request": request,
-        "listing": listing,
-        "related": related,
-        "lang": get_lang(request),
+        "request": request, "user": user,
+        "listing": listing, "related": related, "lang": get_lang(request),
     })
 
 
