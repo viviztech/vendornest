@@ -88,7 +88,7 @@ def update_service(
 
     db.add(ServiceTracking(
         service_request_id=sr.id, status=new_status,
-        description=f"Status updated to {new_status}",
+        note=f"Status updated to {new_status}",
         updated_by=user.id,
     ))
     db.commit()

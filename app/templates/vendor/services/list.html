@@ -1,0 +1,79 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Service Requests{% endblock %}
+{% block page_title %}Service Requests{% endblock %}
+
+{% block content %}
+<div class="mb-5 flex items-center justify-between flex-wrap gap-3">
+  <div class="flex gap-2 flex-wrap">
+    <a href="/vendor/services"
+       class="px-3 py-1.5 rounded-lg text-sm font-medium border
+              {% if status_filter == 'all' %}bg-blue-600 text-white border-blue-600{% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
+      All ({{ total if status_filter == 'all' else '' }})
+    </a>
+    {% for s in ['pending','confirmed','technician_assigned','in_progress','completed','cancelled'] %}
+    <a href="/vendor/services?status={{ s }}"
+       class="px-3 py-1.5 rounded-lg text-sm font-medium border
+              {% if status_filter == s %}bg-blue-600 text-white border-blue-600{% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
+      {{ s.replace('_',' ')|title }}
+    </a>
+    {% endfor %}
+  </div>
+  <span class="text-sm text-gray-400">{{ total }} request(s)</span>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+  <table class="w-full">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Request #</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Service</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Device</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Preferred Date</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+        <th class="px-6 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for sr in service_requests %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-3 font-mono text-sm font-medium text-gray-900">#{{ sr.request_number }}</td>
+        <td class="px-6 py-3 text-sm text-gray-700">{{ sr.service_category.name if sr.service_category else '—' }}</td>
+        <td class="px-6 py-3 text-sm text-gray-600 max-w-xs truncate">{{ sr.device_description }}</td>
+        <td class="px-6 py-3 text-sm text-gray-500">
+          {{ sr.preferred_date.strftime('%d %b %Y') if sr.preferred_date else '—' }}
+          {% if sr.preferred_time %}<span class="text-xs text-gray-400"> · {{ sr.preferred_time }}</span>{% endif %}
+        </td>
+        <td class="px-6 py-3">
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium
+            {% if sr.status.value == 'completed' %}bg-green-100 text-green-700
+            {% elif sr.status.value == 'cancelled' %}bg-red-100 text-red-600
+            {% elif sr.status.value == 'pending' %}bg-yellow-100 text-yellow-700
+            {% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ sr.status.value.replace('_',' ')|title }}
+          </span>
+        </td>
+        <td class="px-6 py-3">
+          <a href="/vendor/services/{{ sr.id }}" class="text-sm text-blue-600 hover:underline">View</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="px-6 py-12 text-center text-gray-400">No service requests found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<div class="flex gap-2 mt-4 justify-center">
+  {% for p in range(1, pages + 1) %}
+  <a href="/vendor/services?status={{ status_filter }}&page={{ p }}"
+     class="px-3 py-1.5 rounded-lg text-sm border
+            {% if p == page %}bg-blue-600 text-white border-blue-600{% else %}bg-white text-gray-600 border-gray-200{% endif %}">
+    {{ p }}
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

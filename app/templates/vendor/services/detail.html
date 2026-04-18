@@ -1,0 +1,156 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Service #{{ sr.request_number }}{% endblock %}
+{% block page_title %}Service Request Detail{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl space-y-5">
+
+  <!-- Header -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <p class="text-xs font-mono text-gray-400 mb-1">#{{ sr.request_number }}</p>
+        <h2 class="text-lg font-bold text-gray-900">{{ sr.service_category.name if sr.service_category else 'Service Request' }}</h2>
+        {% if sr.brand %}<p class="text-sm text-gray-500">{{ sr.brand.name }}</p>{% endif %}
+      </div>
+      <span class="px-3 py-1 rounded-full text-sm font-semibold
+        {% if sr.status.value == 'completed' %}bg-green-100 text-green-700
+        {% elif sr.status.value == 'cancelled' %}bg-red-100 text-red-600
+        {% elif sr.status.value == 'pending' %}bg-yellow-100 text-yellow-700
+        {% else %}bg-blue-100 text-blue-700{% endif %}">
+        {{ sr.status.value.replace('_',' ')|title }}
+      </span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div class="bg-gray-50 rounded-lg p-3">
+        <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Device</p>
+        <p class="font-medium text-gray-900">{{ sr.device_description }}</p>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Preferred Schedule</p>
+        <p class="font-medium text-gray-900">{{ sr.preferred_date.strftime('%d %b %Y') if sr.preferred_date else '—' }}</p>
+        {% if sr.preferred_time %}<p class="text-gray-600 text-xs mt-0.5">{{ sr.preferred_time }}</p>{% endif %}
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3 col-span-2">
+        <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Issue Description</p>
+        <p class="text-gray-700">{{ sr.issue_description }}</p>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3 col-span-2">
+        <p class="text-xs text-gray-400 uppercase tracking-wide mb-2">Service Address</p>
+        <p class="text-gray-700">{{ sr.service_address }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technician & charges -->
+  {% if sr.technician_name or sr.confirmed_date %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h3 class="font-semibold text-gray-900 mb-4">Assigned Technician</h3>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <p class="text-xs text-gray-400 mb-1">Name</p>
+        <p class="font-medium">{{ sr.technician_name or '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-400 mb-1">Phone</p>
+        <p class="font-medium">{{ sr.technician_phone or '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-400 mb-1">Confirmed Date</p>
+        <p class="font-medium">{{ sr.confirmed_date.strftime('%d %b %Y') if sr.confirmed_date else '—' }}</p>
+      </div>
+      <div>
+        <p class="text-xs text-gray-400 mb-1">Confirmed Time</p>
+        <p class="font-medium">{{ sr.confirmed_time or '—' }}</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Charges -->
+  {% if sr.status.value == 'completed' %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h3 class="font-semibold text-gray-900 mb-4">Charges</h3>
+    <div class="space-y-2 text-sm">
+      <div class="flex justify-between"><span class="text-gray-500">Visiting Charge</span><span>₹{{ "{:,.2f}".format(sr.visiting_charge or 0) }}</span></div>
+      <div class="flex justify-between"><span class="text-gray-500">Service Charge</span><span>₹{{ "{:,.2f}".format(sr.service_charge or 0) }}</span></div>
+      <div class="flex justify-between"><span class="text-gray-500">Parts Charge</span><span>₹{{ "{:,.2f}".format(sr.parts_charge or 0) }}</span></div>
+      <div class="flex justify-between font-bold border-t border-gray-100 pt-2"><span>Total</span><span>₹{{ "{:,.2f}".format(sr.total_amount or 0) }}</span></div>
+    </div>
+    {% if sr.resolution_notes %}
+    <div class="mt-4 bg-gray-50 rounded-lg p-3">
+      <p class="text-xs text-gray-400 mb-1">Resolution Notes</p>
+      <p class="text-sm text-gray-700">{{ sr.resolution_notes }}</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Update status form -->
+  {% if sr.status.value not in ['completed', 'cancelled'] %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h3 class="font-semibold text-gray-900 mb-4">Update Request</h3>
+    <form method="post" action="/vendor/services/{{ sr.id }}/update" class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Status</label>
+          <select name="new_status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            {% for s in ['pending','confirmed','technician_assigned','technician_on_the_way','in_progress','completed','cancelled','no_show'] %}
+            <option value="{{ s }}" {% if s == sr.status.value %}selected{% endif %}>{{ s.replace('_',' ')|title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Technician Name</label>
+          <input type="text" name="technician_name" value="{{ sr.technician_name or '' }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Confirmed Date</label>
+          <input type="date" name="confirmed_date" value="{{ sr.confirmed_date.isoformat() if sr.confirmed_date else '' }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Confirmed Time</label>
+          <input type="text" name="confirmed_time" value="{{ sr.confirmed_time or '' }}" placeholder="e.g. 10:00 AM - 12:00 PM"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Service Charge (₹)</label>
+          <input type="number" name="service_charge" step="0.01" value="{{ sr.service_charge or '' }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-500 mb-1">Resolution Notes</label>
+          <input type="text" name="resolution_notes" value="{{ sr.resolution_notes or '' }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+      <button type="submit"
+              class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+        Update
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Tracking timeline -->
+  {% if sr.tracking %}
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h3 class="font-semibold text-gray-900 mb-4">Timeline</h3>
+    <div class="space-y-3">
+      {% for t in sr.tracking|reverse %}
+      <div class="flex gap-4 text-sm">
+        <span class="text-gray-400 whitespace-nowrap text-xs">{{ t.created_at.strftime('%d %b %H:%M') }}</span>
+        <span class="font-medium text-gray-800">{{ t.status.replace('_',' ')|title }}</span>
+        {% if t.note %}<span class="text-gray-500">— {{ t.note }}</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <a href="/vendor/services" class="text-sm text-blue-600 hover:underline">← Back to all requests</a>
+</div>
+{% endblock %}
