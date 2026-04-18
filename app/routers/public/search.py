@@ -98,27 +98,22 @@ def browse_products(
     request: Request,
     brand_id: int = Query(None),
     category_id: int = Query(None),
-    pincode: str = Query(None),
     q: str = Query(None),
     page: int = Query(1),
     db: Session = Depends(get_db),
 ):
     from app.models.product import Product
-    query = db.query(VendorProduct).join(VendorProduct.product).filter(
-        VendorProduct.is_active == True
-    )
+    query = db.query(Product).filter_by(is_active=True, is_approved=True)
     if brand_id:
-        query = query.filter(VendorProduct.product.has(brand_id=brand_id))
+        query = query.filter_by(brand_id=brand_id)
     if category_id:
-        query = query.filter(VendorProduct.product.has(category_id=category_id))
+        query = query.filter_by(category_id=category_id)
     if q:
-        query = query.filter(VendorProduct.product.has(
-            Product.name.ilike(f"%{q}%")
-        ))
+        query = query.filter(Product.name.ilike(f"%{q}%"))
 
     size = 24
     total = query.count()
-    listings = query.offset((page - 1) * size).limit(size).all()
+    products = query.order_by(Product.name).offset((page - 1) * size).limit(size).all()
 
     brands = db.query(Brand).filter_by(is_active=True).order_by(Brand.name).all()
     categories = db.query(Category).filter(
@@ -127,7 +122,7 @@ def browse_products(
 
     return templates.TemplateResponse("public/products.html", {
         "request": request,
-        "listings": listings,
+        "products": products,
         "brands": brands,
         "categories": categories,
         "total": total,
@@ -136,7 +131,6 @@ def browse_products(
         "selected_brand_id": brand_id,
         "selected_category_id": category_id,
         "query": q,
-        "pincode": pincode,
         "lang": get_lang(request),
     })
 
