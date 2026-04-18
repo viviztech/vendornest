@@ -25,17 +25,13 @@
         <span class="text-xl font-bold text-gray-900">VendorNest</span>
       </a>
 
-      <!-- Center: Search bar -->
-      <form action="/search" method="get" class="hidden md:flex items-center gap-2 flex-1 max-w-md mx-8">
-        <input
-          type="text" name="pincode" placeholder="Enter your pincode..."
-          pattern="[0-9]{6}" maxlength="6"
-          class="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
-          Find Vendors
-        </button>
-      </form>
+      <!-- Center nav links -->
+      <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600 mx-8">
+        <a href="/customer/enquiries/new" class="hover:text-blue-600 flex items-center gap-1.5">
+          <span>📋</span> Submit Enquiry
+        </a>
+        <a href="/products" class="hover:text-blue-600">Browse Products</a>
+      </div>
 
       <!-- Right: Nav links -->
       <div class="flex items-center gap-4">
@@ -71,11 +67,14 @@
                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
             {% if user.role == 'superadmin' %}
             <a href="/admin/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Admin Dashboard</a>
+            <a href="/admin/enquiries" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Enquiries</a>
             {% elif user.role == 'vendor' %}
             <a href="/vendor/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Vendor Dashboard</a>
+            <a href="/vendor/enquiries" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Browse Enquiries</a>
             {% else %}
+            <a href="/customer/enquiries" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Enquiries</a>
+            <a href="/customer/enquiries/new" class="block px-4 py-2 text-sm text-blue-600 font-medium hover:bg-blue-50">+ New Enquiry</a>
             <a href="/customer/orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Orders</a>
-            <a href="/customer/services" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Services</a>
             {% endif %}
             <hr class="my-1"/>
             <a href="/auth/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
@@ -125,15 +124,17 @@
       <div>
         <h4 class="font-semibold text-gray-900 mb-3">For Customers</h4>
         <ul class="space-y-2 text-sm text-gray-500">
-          <li><a href="/" class="hover:text-blue-600">Find Vendors</a></li>
+          <li><a href="/customer/enquiries/new" class="hover:text-blue-600">Submit an Enquiry</a></li>
+          <li><a href="/customer/enquiries" class="hover:text-blue-600">My Enquiries</a></li>
           <li><a href="/products" class="hover:text-blue-600">Browse Products</a></li>
-          <li><a href="/auth/register" class="hover:text-blue-600">Register</a></li>
+          <li><a href="/auth/register" class="hover:text-blue-600">Create Account</a></li>
         </ul>
       </div>
       <div>
         <h4 class="font-semibold text-gray-900 mb-3">For Vendors</h4>
         <ul class="space-y-2 text-sm text-gray-500">
           <li><a href="/auth/vendor/register" class="hover:text-blue-600">Register as Vendor</a></li>
+          <li><a href="/vendor/enquiries" class="hover:text-blue-600">Browse Enquiries</a></li>
           <li><a href="/auth/login" class="hover:text-blue-600">Vendor Login</a></li>
         </ul>
       </div>
@@ -145,7 +146,7 @@
       </div>
     </div>
     <div class="border-t border-gray-100 mt-8 pt-4 text-center text-xs text-gray-400">
-      © 2025 VendorNest. All rights reserved.
+      © 2026 VendorNest. All rights reserved.
     </div>
   </div>
 </footer>
