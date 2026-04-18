@@ -16,6 +16,7 @@ from app.routers.admin.dashboard import router as admin_dashboard_router
 from app.routers.admin.vendors import router as admin_vendors_router
 from app.routers.admin.brands import router as admin_brands_router
 from app.routers.admin.commissions import router as admin_commissions_router
+from app.routers.admin.orders import router as admin_orders_router
 from app.routers.vendor.dashboard import router as vendor_dashboard_router
 from app.routers.vendor.products import router as vendor_products_router
 from app.routers.vendor.orders import router as vendor_orders_router
@@ -61,6 +62,7 @@ app.include_router(admin_dashboard_router)
 app.include_router(admin_vendors_router)
 app.include_router(admin_brands_router)
 app.include_router(admin_commissions_router)
+app.include_router(admin_orders_router)
 app.include_router(vendor_dashboard_router)
 app.include_router(vendor_products_router)
 app.include_router(vendor_orders_router)

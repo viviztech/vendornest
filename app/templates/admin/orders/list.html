@@ -1,0 +1,80 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Orders{% endblock %}
+{% block page_title %}All Orders{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex items-center justify-between">
+  <div class="flex gap-2 flex-wrap">
+    <a href="/admin/orders"
+       class="px-3 py-1.5 rounded-lg text-sm font-medium border
+              {% if status_filter == 'all' %}bg-blue-600 text-white border-blue-600{% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
+      All ({{ total if status_filter == 'all' else '' }})
+    </a>
+    {% for s in statuses %}
+    <a href="/admin/orders?status={{ s }}"
+       class="px-3 py-1.5 rounded-lg text-sm font-medium border
+              {% if status_filter == s %}bg-blue-600 text-white border-blue-600{% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
+      {{ s.replace('_', ' ')|title }}
+    </a>
+    {% endfor %}
+  </div>
+  <span class="text-sm text-gray-400">{{ total }} order(s)</span>
+</div>
+
+<div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+  <table class="w-full">
+    <thead class="bg-gray-50 border-b border-gray-200">
+      <tr>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Order</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Customer</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Vendor</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Commission</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
+        <th class="px-6 py-3"></th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for order in orders %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-3 font-mono text-sm font-medium text-gray-900">#{{ order.order_number }}</td>
+        <td class="px-6 py-3 text-sm text-gray-700">{{ order.customer.name if order.customer else '—' }}</td>
+        <td class="px-6 py-3 text-sm text-gray-700">{{ order.vendor.business_name if order.vendor else '—' }}</td>
+        <td class="px-6 py-3 text-sm font-semibold text-gray-900">₹{{ "{:,.0f}".format(order.total_amount) }}</td>
+        <td class="px-6 py-3 text-sm text-green-600">₹{{ "{:,.0f}".format(order.commission_amount) }}</td>
+        <td class="px-6 py-3">
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium
+            {% if order.status.value == 'delivered' %}bg-green-100 text-green-700
+            {% elif order.status.value in ['cancelled', 'refunded', 'payment_failed'] %}bg-red-100 text-red-600
+            {% elif order.status.value == 'confirmed' %}bg-blue-100 text-blue-700
+            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
+            {{ order.status.value.replace('_', ' ')|title }}
+          </span>
+        </td>
+        <td class="px-6 py-3 text-sm text-gray-400">{{ order.created_at.strftime('%d %b %Y') }}</td>
+        <td class="px-6 py-3">
+          <a href="/admin/orders/{{ order.id }}" class="text-sm text-blue-600 hover:underline">View</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" class="px-6 py-12 text-center text-gray-400">No orders found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<div class="flex gap-2 mt-4 justify-center">
+  {% for p in range(1, pages + 1) %}
+  <a href="/admin/orders?status={{ status_filter }}&page={{ p }}"
+     class="px-3 py-1.5 rounded-lg text-sm border
+            {% if p == page %}bg-blue-600 text-white border-blue-600{% else %}bg-white text-gray-600 border-gray-200 hover:border-blue-300{% endif %}">
+    {{ p }}
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
